@@ -124,6 +124,20 @@
       transition: transform 0.1s ease;
     }
 
+    .swipearea {
+      z-index: 1031;
+      position: absolute;
+      top: -1%;
+      left: 50.4%;
+      transform: translate(-50%, -50%);
+      width: 40%;
+      height: 38%;
+      background: transparent;
+      border: 0;
+      outline: 0;
+      cursor: pointer;
+    }
+
     .radar {
       display: flex;
       justify-content: center;
@@ -144,6 +158,7 @@
   <div class="radar inactive">
     <div class="mapcontainer">
       <div class="top"></div>
+      <div class="swipearea"></div>
       <div id="mapid" style=""></div>
     </div>
   </div>
@@ -221,7 +236,7 @@
     //   radar.classList.toggle('inactive')
     // })
 
-    var mc = new Hammer(document.querySelector('.top'))
+    var mc = new Hammer(document.querySelector('.swipearea'))
 
     mc.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
 
