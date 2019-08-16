@@ -204,6 +204,9 @@
     </div>
   </div>
   <script>
+    var audioScroll = new Audio('scroll.mp3');
+    var audioBlip = new Audio('blip.mp3');
+
     var mymap = L.map('mapid').setView([51.505, -0.09], 13);
 
     // L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
@@ -285,11 +288,13 @@
     mc.on('swipeleft', function(ev) {
         mymap.setZoom(mymap.getZoom() - 1)
         console.log('zoomout', ev)
+        audioScroll.play()
     });
 
     mc.on('swiperight', function(ev) {
         mymap.setZoom(mymap.getZoom() + 1)
         console.log('zoomin', ev)
+        audioScroll.play()
     });
 
     mc.on('swipedown', function(ev) {
@@ -302,6 +307,7 @@
 
         navigator.geolocation.getCurrentPosition(function(location) {
           var latlng = new L.LatLng(location.coords.latitude, location.coords.longitude);
+          audioBlip.play()
 
           console.log(latlng)
           mymap.setView(latlng, 13)
