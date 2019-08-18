@@ -103,10 +103,10 @@ mc.on('swipedown', function(ev) {
       var errorElement = document.querySelector('.error')
 
       errorElement.classList.add('hidden')
+      clearTimeout(animationTimeout)
 
       setTimeout(() => {
         errorElement.classList.remove('hidden')
-        clearTimeout(animationTimeout)
 
         animationTimeout = setTimeout(() => {
           errorElement.classList.add('hidden')

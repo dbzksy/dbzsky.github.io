@@ -216,3 +216,15 @@ body {
   display: block;
   font-size: 5vmin;
 }
+
+@media screen and (min-height: 600px) and (min-width: 600px){
+  .error_top {
+    display: block;
+    font-size: 47px;
+  }
+
+  .error_bottom {
+    display: block;
+    font-size: 30px;
+  }
+}
