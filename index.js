@@ -102,12 +102,16 @@ mc.on('swipedown', function(ev) {
     function (error) {
       var errorElement = document.querySelector('.error')
 
-      errorElement.classList.remove('hidden')
-      clearTimeout(animationTimeout)
+      errorElement.classList.add('hidden')
 
-      animationTimeout = setTimeout(() => {
-        errorElement.classList.add('hidden')
-      }, 5100);
+      setTimeout(() => {
+        errorElement.classList.remove('hidden')
+        clearTimeout(animationTimeout)
+
+        animationTimeout = setTimeout(() => {
+          errorElement.classList.add('hidden')
+        }, 5100)
+      }, 10)
     }
   )
 });
