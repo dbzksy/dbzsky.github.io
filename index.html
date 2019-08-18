@@ -21,9 +21,7 @@
   <link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
 
   <script>
-    // Check that service workers are supported
     if ('serviceWorker' in navigator) {
-      // Use the window load event to keep the page load performant
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js');
       });
@@ -31,303 +29,25 @@
   </script>
 
   <link rel="stylesheet" href="leaflet.css"/>
+  <link rel="stylesheet" href="main.css"/>
   <script src="leaflet.js"></script>
   <script src="hammer.min.js"></script>
-
-  <style>
-    @keyframes down {
-      from {
-        transform: translateY(0%);
-      }
-      to {
-        transform: translateY(20%);
-      }
-    }
-
-    body {
-      background-color: #2e9eed;
-      margin: 0;
-      padding: 0;
-    }
-
-    #mapid {
-      height: 100%;
-      width: 100%;
-      border-radius: 50%;
-      background-color: transparent;
-      background-image: linear-gradient(rgba(136, 147, 109, 0.41) 1px, transparent 1px), linear-gradient(90deg, rgba(136, 147, 109, 0.41) 1px, transparent 1px);
-      background-position: calc(50% + 20px) calc(50% + 20px);
-      background-size: 40px 40px;
-      box-sizing: border-box;
-      height: 70%;
-      width: 70%;
-      transition: background 0.05s ease;
-    }
-
-    .radar.inactive #mapid {
-      background-image: linear-gradient(rgb(46, 62, 9) 1px, transparent 1px), linear-gradient(90deg, rgb(46, 62, 9) 1px, transparent 1px);
-    }
-
-    #mapid::before {
-      z-index: -1;
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgb(61, 103, 36) 0%, rgb(13, 33, 1) 100%);
-      transition: background 0.05s ease;
-    }
-
-    .radar.inactive #mapid::before {
-      background: radial-gradient(circle, rgb(20, 49, 3) 0%, rgb(8, 23, 0) 100%);
-    }
-
-    .radar.inactive::after {
-      display: none;
-    }
-
-    .radar.inactive #mapid > * {
-      display: none;
-    }
-
-    .mapcontainer {
-      margin-top: 14vh;
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      max-width: 500px;
-      max-height: 500px;
-    }
-
-    .mapcontainer::before {
-      z-index: 999;
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url(bottomsquare.png);
-      background-position: center;
-      background-size: contain;
-      background-repeat: no-repeat;
-    }
-
-    .radar:not(.inactive) .mapcontainer::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      z-index: 9999;
-      width: 0;
-      height: 0;
-      border-left: 7px solid transparent;
-      border-right: 7px solid transparent;
-      border-bottom: 12px solid red;
-      transform: translate(-50%, -50%);
-    }
-
-    .top {
-      z-index: 998;
-      position: absolute;
-      top: -1%;
-      left: 50.4%;
-      transform: translate(-50%, -50%);
-      width: 17%;
-      height: 15%;
-      background: transparent;
-      border: 0;
-      outline: 0;
-      cursor: pointer;
-    }
-
-    .top.animate::before {
-      animation: down 0.1s ease;
-    }
-
-    .top::before {
-      content: '';
-      z-index: 998;
-      position: absolute;
-      top: -2%;
-      left: 50%;
-      margin-left: -50%;
-      width: 100%;
-      height: 100%;
-      background-image: url(top.png);
-      background-position: center;
-      background-size: contain;
-      background-repeat: no-repeat;
-      transition: transform 0.1s ease;
-    }
-
-    .swipearea {
-      z-index: 1031;
-      position: absolute;
-      top: -1%;
-      left: 50.4%;
-      transform: translate(-50%, -50%);
-      width: 40%;
-      height: 38%;
-      background: transparent;
-      border: 0;
-      outline: 0;
-      cursor: pointer;
-    }
-
-    .radar {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      background-image: url(bg.jpg);
-      background-size: cover;
-    }
-
-    .leaflet-control-container {
-      display: none;
-    }
-  </style>
 </head>
 <body>
   <div class="radar inactive">
-    <div class="mapcontainer">
-      <div class="top"></div>
-      <div class="swipearea"></div>
-      <div id="mapid" style=""></div>
+    <div class="aspect-ratio-box">
+      <div class="mapcontainer">
+        <div class="top"></div>
+        <div class="swipearea"></div>
+        <div id="map"></div>
+        <div class="error hidden">
+          <div class="error_top">ERROR</div>
+          <div class="error_bottom">Enable GPS</div>
+        </div>
+      </div>
     </div>
   </div>
-  <script>
-    var audioScroll = new Audio('scroll.mp3');
-    var audioBlip = new Audio('blip.mp3');
 
-    var mymap = L.map('mapid').setView([51.505, -0.09], 13);
-
-    // L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
-    //   minZoom: 10,
-    //   maxZoom: 18,
-    // 	attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-    // 		'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-    // 		'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-    // 	id: 'mapbox.streets'
-    // }).addTo(mymap);
-
-    var locations = [
-      [48.2424511,16.3779938],
-      [48.1991614,16.3698031],
-      [48.2074629,16.3608295],
-      [48.1789507,16.3915249],
-      [48.2098153,16.3635864],
-      [48.192193,16.4276749],
-    ]
-
-    for (let index = 0; index < locations.length; index++) {
-      const location = locations[index];
-
-      L.circleMarker(location, {
-        radius: 3,
-        color: 'gold',
-        fillColor: 'gold',
-        fillOpacity: 1
-      }).addTo(mymap)
-      // L.circle(location, 2, {
-      //   color: 'gold',
-      //   fillColor: 'gold',
-      //   fillOpacity: 1
-      // }).addTo(mymap)
-    }
-
-    function updateSize () {
-      var w = window.innerWidth;
-      var h = window.innerHeight;
-      var element = document.querySelector('.mapcontainer')
-
-      if (w > h) {
-        element.style.width = h * 0.9 + 'px'
-        element.style.height = h * 0.9 + 'px'
-      } else {
-        element.style.width = w * 0.9 + 'px'
-        element.style.height = w * 0.9 + 'px'
-      }
-
-      mymap.invalidateSize()
-    }
-
-    window.addEventListener('resize', updateSize)
-    updateSize()
-
-    // function onMapClick(e) {
-    //   // popup
-    //   //   .setLatLng(e.latlng)
-    //   //   .setContent("You clicked the map at " + e.latlng.toString())
-    //   //   .openOn(mymap);
-    // }
-
-    // mymap.on('click', onMapClick);
-
-    mymap.dragging.disable();
-    mymap.scrollWheelZoom.disable();
-
-    // document.querySelector('.top').addEventListener('click', function () {
-    //   var radar = document.querySelector('.radar')
-
-    //   radar.classList.toggle('inactive')
-    // })
-
-    var mc = new Hammer(document.querySelector('.swipearea'))
-
-    mc.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
-
-    // listen to events...
-    mc.on('swipeleft', function(ev) {
-        mymap.setZoom(mymap.getZoom() - 1)
-        console.log('zoomout', ev)
-        audioScroll.play()
-    });
-
-    mc.on('swiperight', function(ev) {
-        mymap.setZoom(mymap.getZoom() + 1)
-        console.log('zoomin', ev)
-        audioScroll.play()
-    });
-
-    mc.on('swipedown', function(ev) {
-        console.log('activate', ev)
-
-        document.querySelector('.top').classList.add('animate')
-        setTimeout(() => {
-          document.querySelector('.top').classList.remove('animate')
-        }, 100);
-
-        navigator.geolocation.getCurrentPosition(function(location) {
-          var latlng = new L.LatLng(location.coords.latitude, location.coords.longitude);
-          audioBlip.play()
-
-          console.log(latlng)
-          mymap.setView(latlng, 13)
-
-          var radar = document.querySelector('.radar')
-          radar.classList.toggle('inactive')
-          // mymap.on('zoom', function () {
-          //   mymap.panTo(latlng, { animate: false })
-          // })
-        }, function (error) {
-
-        })
-    });
-
-    // document.querySelector('.zoomin').addEventListener('click', function () {
-    //   mymap.setZoom(map.getZoom() + 1)
-    // })
-
-    // document.querySelector('.zoomout').addEventListener('click', function () {
-    // })
-  </script>
+  <script src="index.js"></script>
 </body>
 </html>
